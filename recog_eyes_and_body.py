@@ -13,6 +13,8 @@ from fitshape import line
 from fitshape import min_rectangle
 from fitshape import rectangle
 
+from fitshape import ellipse
+
 # number of images to be processed
 max_index = 2
 
@@ -53,15 +55,18 @@ for i in range(max_index+1):
 
     # apply eye mask
     img = eye_mask(img)
+    img = cv2.dilate(img, None, iterations=2) #2
 
     # find contours
     cnts, _ = cv2.findContours(img, 1, 2)
     cnts, _ = contours.sort_contours(cnts)
 
     # fit rectangle
-    x, y, w, h = rectangle(cnts, img, org)
+    x, y, w, h = ellipse(cnts, img, org)
 
     print('Dimensions of picture ' + str(i) + ':' + str(w) + 'x' + str(h) + 'px')
+
+    #cv2.imshow('img', scale(img, 30))
 
     # display width and height of rectangle
     #display(x, y, w, h, org)
@@ -72,19 +77,22 @@ for i in range(max_index+1):
     _ , img = prep('img/rotated_' + str(i) + '.tif')
 
     # apply background mask
-    img = background_mask(img)
+    mask = background_mask(img)
+    mask_inv = cv2.bitwise_not(mask)
 
     # perform edge detection
-    #img = cv2.Canny(img, 20, 90) #2080
+    img = cv2.Canny(img, 20, 80) #2080
 
     # perform dilation and erosion to close gaps
-    #img = cv2.dilate(img, None, iterations=2) #2
-    #img = cv2.erode(img, None, iterations=1)
+    img = cv2.dilate(img, None, iterations=5) #2
+    img = cv2.erode(img, None, iterations=5)
+
+    img_fg = cv2.bitwise_and(img, img, mask=mask_inv)
 
     cv2.imshow('img', scale(img, 30))
 
     # find contours
-    cnts, _ = cv2.findContours(img, 1, 2)
+    cnts, _ = cv2.findContours(img, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)#1, 2
     cnts, _ = contours.sort_contours(cnts)
 
     # fit rectangle
