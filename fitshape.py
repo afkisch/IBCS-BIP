@@ -85,3 +85,27 @@ def rectangle(contours, image, original=[], min_area = 10000):
 
     # return coordinates, width and height
     return x, y, w, h
+
+
+# fit ellipse
+def ellipse(contours, image, original=[], min_area = 10000):
+    # loop over the contours individually
+    for cnt in contours:
+
+        # ignore small contours
+        if cv2.contourArea(cnt) < min_area:
+            continue
+
+        # get corner coordinates (x, y), height (h) and width (w)
+        ellipse = cv2.fitEllipse(cnt)
+
+        # draw the outline of the bounding box
+        if len(original):
+            cv2.ellipse(original, ellipse, (0, 255, 0), 2)
+        else:
+            cv2.ellipse(image, ellipse, (0, 255, 0), 2)
+
+        #display(x, y, w, h, original)
+
+    # return coordinates, width and height
+    return 0, 0, 0, 0
